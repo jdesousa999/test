@@ -1,5 +1,5 @@
 provider "aws" {
-	region 		= "eu-west-1"
+	region 		= "eu-west-3"
 }
 
 variable "server_port" {
@@ -45,11 +45,11 @@ resource "aws_security_group" "elb" {
   }
 }
 resource "aws_instance" "example" {
-	ami 		= "ami-aa2f4ed3"
+	ami 		= "ami-bfff49c2"
 
 	instance_type	= "t2.micro"
 	vpc_security_group_ids = ["${aws_security_group.instance.id}"]
-    key_name        = "ansible"
+    key_name        = "paris"
 	user_data		= <<-EOF
 					#!/bin/bash
 					echo "Hello, World" > index.html
@@ -61,13 +61,16 @@ resource "aws_instance" "example" {
 	}
 }
 resource "aws_launch_configuration" "example" {
-  image_id        = "ami-aa2f4ed3"
+  image_id        = "ami-bfff49c2"
   instance_type   = "t2.micro"
   security_groups = ["${aws_security_group.instance.id}"]
-  key_name        = "ansible"
+  key_name        = "paris"
 
   user_data = <<-EOF
               #!/bin/bash
+              yum -y install wget
+              wget http://download.fedoraproject.org/pub/epel/7/x86_64/e/epel-release-7-2.noarch.rpm
+	      rpm -Uvh epel-release-7*.rpm
               echo "Hello, World" > index.html
               nohup busybox httpd -f -p "${var.server_port}" &
               EOF
@@ -78,7 +81,7 @@ resource "aws_launch_configuration" "example" {
 }
 resource "aws_autoscaling_group" "example" {
   launch_configuration = "${aws_launch_configuration.example.id}"
-  availability_zones = ["eu-west-1a", "eu-west-1b", "eu-west-1c"]
+  availability_zones = ["eu-west-3a", "eu-west-3b", "eu-west-3c"]
 
   min_size = 2
   max_size = 10
@@ -94,7 +97,7 @@ resource "aws_autoscaling_group" "example" {
 }
 resource "aws_elb" "example" {
   name               = "terraform-asg-example"
-  availability_zones = ["eu-west-1a", "eu-west-1b", "eu-west-1c"]
+  availability_zones = ["eu-west-3a", "eu-west-3b", "eu-west-3c"]
 
   listener {
     lb_port           = 80

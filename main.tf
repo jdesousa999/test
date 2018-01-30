@@ -44,33 +44,31 @@ resource "aws_security_group" "elb" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 }
+/*
 resource "aws_instance" "example" {
 	ami 		= "ami-bfff49c2"
-
 	instance_type	= "t2.micro"
 	vpc_security_group_ids = ["${aws_security_group.instance.id}"]
-    key_name        = "paris"
-	user_data		= <<-EOF
-					#!/bin/bash
-					echo "Hello, World" > index.html
-					nohup busybox httpd -f -p 8080 &
-					EOF
+        key_name        = "paris"
+	user_data	= <<-EOF
+			#!/bin/bash
+			echo "Hello, World" > index.html
+			nohup busybox httpd -f -p 8080 &
+			EOF
 
 	tags {
 		Name	= "terraform-example"
 	}
 }
+*/
 resource "aws_launch_configuration" "example" {
-  image_id        = "ami-bfff49c2"
+  image_id        = "ami-63b4021e"
   instance_type   = "t2.micro"
   security_groups = ["${aws_security_group.instance.id}"]
   key_name        = "paris"
 
   user_data = <<-EOF
               #!/bin/bash
-              yum -y install wget
-              wget http://download.fedoraproject.org/pub/epel/7/x86_64/e/epel-release-7-2.noarch.rpm
-	      rpm -Uvh epel-release-7*.rpm
               echo "Hello, World" > index.html
               nohup busybox httpd -f -p "${var.server_port}" &
               EOF
@@ -95,6 +93,8 @@ resource "aws_autoscaling_group" "example" {
     propagate_at_launch = true
   }
 }
+
+
 resource "aws_elb" "example" {
   name               = "terraform-asg-example"
   availability_zones = ["eu-west-3a", "eu-west-3b", "eu-west-3c"]
